@@ -5,9 +5,15 @@ import os
 
 
 class TweetListener(tweepy.StreamListener):
+    def __init__(self, api):
+        self.api = api
+        self.me = api.me()
 
     def on_status(self, status):
         print(status.text)
+
+    def on_error(self, status):
+        print("Error detected")
 
 
 def get_credentials():
@@ -43,7 +49,10 @@ def create_api(consumer_key, consumer_secret, access_token, access_token_secret)
   print("API Created")
   return api
 
+
 if __name__ == "__main__":
+  keywords = ['crypto', 'cryptocurrency']
+  
   credentials = get_credentials()
   test_authentication(
     credentials['consumer_key'], 
@@ -59,5 +68,6 @@ if __name__ == "__main__":
     credentials['access_token_secret']
   )
 
-  myTweetListener = TweetListener()
-
+  tweets_listener = TweetListener(api)
+  stream = tweepy.Stream(api.auth, tweets_listener)
+  stream.filter(track=keywords, languages=["en"])
