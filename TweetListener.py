@@ -29,16 +29,35 @@ def test_authentication(consumer_key, consumer_secret, access_token, access_toke
       api.verify_credentials()
       print("Authentication OK")
   except:
-      print("Error during authentication")
+      print("Athentication Error")
 
+def create_api(consumer_key, consumer_secret, access_token, access_token_secret):
+  auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+  auth.set_access_token(access_token, access_token_secret)
+  api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+  try:
+      api.verify_credentials()
+  except Exception as e:
+      raise e
+  
+  print("API Created")
+  return api
 
 if __name__ == "__main__":
   credentials = get_credentials()
-
-  myTweetListener = TweetListener()
   test_authentication(
     credentials['consumer_key'], 
     credentials['consumer_secret'], 
     credentials['access_token'], 
     credentials['access_token_secret']
   )
+
+  api = create_api(
+    credentials['consumer_key'], 
+    credentials['consumer_secret'], 
+    credentials['access_token'], 
+    credentials['access_token_secret']
+  )
+
+  myTweetListener = TweetListener()
+
