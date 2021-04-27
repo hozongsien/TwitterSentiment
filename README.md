@@ -25,3 +25,8 @@ A prototype experiment on the real time sentiment analysis of tweets using PySpa
     python TweetListener.py 
     ```
 6. Run the iPython notebook `SentimentAnalysis.ipynb` for sentiment analysis.
+
+# References
+
+- https://realpython.com/twitter-bot-python-tweepy/
+- https://towardsdatascience.com/sentiment-analysis-on-streaming-twitter-data-using-spark-structured-streaming-python-fc873684bfe3
