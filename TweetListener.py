@@ -5,15 +5,25 @@ import os
 
 
 class TweetListener(tweepy.StreamListener):
-    def __init__(self, api):
+    def __init__(self, api, csocket):
         self.api = api
         self.me = api.me()
+        self.client_socket = csocket
 
     def on_status(self, status):
         print(status.text)
+    
+    def on_data(self, data):
+      try:
+          msg = json.loads(data)
+          encoded = msg['text'].encode('utf-8')
+          self.client_socket.send(encoded)
+      except BaseException as e:
+          print("Error on_data: {}".format(str(e)))
+      return True
 
     def on_error(self, status):
-        print("Error detected")
+        print("Error detected. Status: {}".format(status))
 
 
 def get_credentials():
@@ -49,6 +59,15 @@ def create_api(consumer_key, consumer_secret, access_token, access_token_secret)
   print("API Created")
   return api
 
+def create_server_connection(host='0.0.0.0', port=5555):
+  sock = socket.socket()
+  sock.bind((host, port))
+  sock.listen(5)
+  print('Socket listening')
+
+  c_socket, address = sock.accept()
+  print('Connection accepted: {}'.format(address))
+  return c_socket, address
 
 if __name__ == "__main__":
   keywords = ['crypto', 'cryptocurrency']
@@ -68,6 +87,10 @@ if __name__ == "__main__":
     credentials['access_token_secret']
   )
 
-  tweets_listener = TweetListener(api)
+  # Start server
+  c_socket, address = create_server_connection()
+
+  # Stream tweets
+  tweets_listener = TweetListener(api, c_socket)
   stream = tweepy.Stream(api.auth, tweets_listener)
   stream.filter(track=keywords, languages=["en"])
